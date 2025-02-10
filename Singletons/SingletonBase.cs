@@ -1,30 +1,40 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 ///<summary>
 /// Author: Nathan Fan
-/// Description: Base singleton, can inherit from Behaviour instead too
+/// Description: Base class for creating singletons
+///    can inherit from Behaviour instead too
 ///</summary>
+///<typeparam name="T">The type of the singleton</typeparam>
 public class SingletonBase<T> : MonoBehaviour where T : MonoBehaviour
 {
-    private static T instance;
-    public void Awake()
-    {
-        instance = this as T; //This is a thing?
-    }
     public static T Instance
     {
-        get {
-            if (instance != null) return instance;
-            instance = GameObject.FindAnyObjectByType<T>();
+        get
+        {
             if (instance == null)
             {
-                Debug.LogWarning("You are trying to reference an instanced class that hasn't been initalized!");
-                Debug.LogWarning($"Cannot find object of type {typeof(T)}.");
+                Debug.LogWarning("Referenced instance is not valid, check if it exists in editor and if everything was set up properly. Error from Singelton Base");
+                return null;
             }
             return instance;
-        } 
+        }
+        private set { instance = value; }
+    }
+
+    private static T instance;
+
+    public virtual void Awake()
+    {
+        if (instance != null && instance != this)
+            Destroy(this.gameObject);
+
+        else if (instance == null)
+            instance = this as T;
+    }
+
+    public void Ping()
+    {
+        Debug.Log("Pinged " + this.GetType().Name);
     }
 }
